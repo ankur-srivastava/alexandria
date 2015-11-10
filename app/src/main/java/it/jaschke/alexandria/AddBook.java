@@ -10,6 +10,7 @@ import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.util.Patterns;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -20,6 +21,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 
+import it.jaschke.alexandria.com.google.zxing.integration.android.IntentIntegrator;
+import it.jaschke.alexandria.com.google.zxing.integration.android.IntentResult;
 import it.jaschke.alexandria.data.AlexandriaContract;
 import it.jaschke.alexandria.services.BookService;
 import it.jaschke.alexandria.services.DownloadImage;
@@ -103,6 +106,11 @@ public class AddBook extends Fragment implements LoaderManager.LoaderCallbacks<C
                 Toast toast = Toast.makeText(context, text, duration);
                 toast.show();
 
+                //Custom Code
+                Log.v(TAG, "Ready for Scan");
+                IntentIntegrator scanIntegrator = new IntentIntegrator(getActivity());
+                scanIntegrator.initiateScan();
+
             }
         });
 
@@ -130,6 +138,16 @@ public class AddBook extends Fragment implements LoaderManager.LoaderCallbacks<C
         }
 
         return rootView;
+    }
+
+    public void onActivityResult(int requestCode, int resultCode, Intent intent) {
+        //retrieve scan result
+        IntentResult scanningResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, intent);
+        if (scanningResult != null) {
+            String scanContent = scanningResult.getContents();
+            String scanFormat = scanningResult.getFormatName();
+            Log.v(TAG, "scanContent  is  "+scanContent+" and scanFormat is "+scanFormat);
+        }
     }
 
     private void restartLoader(){
