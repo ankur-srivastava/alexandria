@@ -140,16 +140,6 @@ public class AddBook extends Fragment implements LoaderManager.LoaderCallbacks<C
         return rootView;
     }
 
-    public void onActivityResult(int requestCode, int resultCode, Intent intent) {
-        //retrieve scan result
-        IntentResult scanningResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, intent);
-        if (scanningResult != null) {
-            String scanContent = scanningResult.getContents();
-            String scanFormat = scanningResult.getFormatName();
-            Log.v(TAG, "scanContent  is  "+scanContent+" and scanFormat is "+scanFormat);
-        }
-    }
-
     private void restartLoader(){
         getLoaderManager().restartLoader(LOADER_ID, null, this);
     }
