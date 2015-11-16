@@ -20,9 +20,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-
 import it.jaschke.alexandria.com.google.zxing.integration.android.IntentIntegrator;
-import it.jaschke.alexandria.com.google.zxing.integration.android.IntentResult;
 import it.jaschke.alexandria.data.AlexandriaContract;
 import it.jaschke.alexandria.services.BookService;
 import it.jaschke.alexandria.services.DownloadImage;
@@ -40,10 +38,9 @@ public class AddBook extends Fragment implements LoaderManager.LoaderCallbacks<C
     private String mScanFormat = "Format:";
     private String mScanContents = "Contents:";
 
+    String scanResult;
 
-
-    public AddBook(){
-    }
+    public AddBook(){ }
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
@@ -58,6 +55,29 @@ public class AddBook extends Fragment implements LoaderManager.LoaderCallbacks<C
 
         rootView = inflater.inflate(R.layout.fragment_add_book, container, false);
         ean = (EditText) rootView.findViewById(R.id.ean);
+
+        //Custom Code
+        //If after the scan we get the ISBN number then we can set ean with that and start the intent
+        if(scanResult != null && !scanResult.equals("")){
+            Log.v(TAG, "Got the scanResult "+scanResult);
+            String ean =scanResult;
+            //catch isbn10 numbers
+            if(ean.length()==10 && !ean.startsWith("978")){
+                ean="978"+ean;
+            }
+            if(ean.length()<13){
+                clearFields();
+            }else{
+                Log.v(TAG, "Got the scanResult "+scanResult);
+                //Once we have an ISBN, start a book intent
+                Intent bookIntent = new Intent(getActivity(), BookService.class);
+                bookIntent.putExtra(BookService.EAN, ean);
+                bookIntent.setAction(BookService.FETCH_BOOK);
+                getActivity().startService(bookIntent);
+                AddBook.this.restartLoader();
+            }
+        }
+
 
         ean.addTextChangedListener(new TextWatcher() {
             @Override
