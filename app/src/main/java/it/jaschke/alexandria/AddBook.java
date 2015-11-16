@@ -1,13 +1,14 @@
 package it.jaschke.alexandria;
 
 import android.app.Activity;
+import android.app.Fragment;
+import android.app.LoaderManager;
 import android.content.Context;
+import android.content.CursorLoader;
 import android.content.Intent;
+import android.content.Loader;
 import android.database.Cursor;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.LoaderManager;
-import android.support.v4.content.CursorLoader;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -165,7 +166,7 @@ public class AddBook extends Fragment implements LoaderManager.LoaderCallbacks<C
     }
 
     @Override
-    public android.support.v4.content.Loader<Cursor> onCreateLoader(int id, Bundle args) {
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         if(ean.getText().length()==0){
             return null;
         }
@@ -184,7 +185,12 @@ public class AddBook extends Fragment implements LoaderManager.LoaderCallbacks<C
     }
 
     @Override
-    public void onLoadFinished(android.support.v4.content.Loader<Cursor> loader, Cursor data) {
+    public void onLoaderReset(Loader<Cursor> loader) {
+
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
         if (!data.moveToFirst()) {
             return;
         }
@@ -212,11 +218,6 @@ public class AddBook extends Fragment implements LoaderManager.LoaderCallbacks<C
         rootView.findViewById(R.id.delete_button).setVisibility(View.VISIBLE);
     }
 
-    @Override
-    public void onLoaderReset(android.support.v4.content.Loader<Cursor> loader) {
-
-    }
-
     private void clearFields(){
         ((TextView) rootView.findViewById(R.id.bookTitle)).setText("");
         ((TextView) rootView.findViewById(R.id.bookSubTitle)).setText("");
@@ -231,5 +232,9 @@ public class AddBook extends Fragment implements LoaderManager.LoaderCallbacks<C
     public void onAttach(Activity activity) {
         super.onAttach(activity);
         activity.setTitle(R.string.scan);
+    }
+
+    public void setScanResult(String scanResult) {
+        this.scanResult = scanResult;
     }
 }
