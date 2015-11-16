@@ -31,6 +31,7 @@ import it.jaschke.alexandria.data.AlexandriaContract;
  */
 public class BookService extends IntentService {
 
+    private static final String TAG = "BookService";
     private final String LOG_TAG = BookService.class.getSimpleName();
 
     public static final String FETCH_BOOK = "it.jaschke.alexandria.services.action.FETCH_BOOK";
@@ -106,6 +107,7 @@ public class BookService extends IntentService {
                     .build();
 
             URL url = new URL(builtUri.toString());
+            Log.v(TAG, "URL to fetch the book is "+url);
 
             urlConnection = (HttpURLConnection) url.openConnection();
             urlConnection.setRequestMethod("GET");
