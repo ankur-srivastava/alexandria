@@ -194,6 +194,8 @@ public class MainActivity extends ActionBarActivity implements NavigationDrawerF
             AddBook addBookFragment = new AddBook();
             addBookFragment.setScanResult(scanContent);
 
+            Log.v(TAG, "Call Add book fragment");
+
             getFragmentManager().beginTransaction()
                     .replace(R.id.container, addBookFragment)
                     .addToBackStack((String) title)

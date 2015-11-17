@@ -57,6 +57,7 @@ public class AddBook extends Fragment implements LoaderManager.LoaderCallbacks<C
     public View onCreateView(final LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
         rootView = inflater.inflate(R.layout.fragment_add_book, container, false);
+
         ean = (EditText) rootView.findViewById(R.id.ean);
         isbnButton = (Button) rootView.findViewById(R.id.isbn_button);
 
@@ -73,7 +74,7 @@ public class AddBook extends Fragment implements LoaderManager.LoaderCallbacks<C
             if(ean.length()<13){
                 clearFields();
             }else{
-                Log.v(TAG, "Got the scanResult "+scanResult);
+                Log.v(TAG, "Result is fine "+scanResult);
                 //Once we have an ISBN, start a book intent
                 Intent bookIntent = new Intent(getActivity(), BookService.class);
                 bookIntent.putExtra(BookService.EAN, ean);
@@ -84,26 +85,30 @@ public class AddBook extends Fragment implements LoaderManager.LoaderCallbacks<C
         }
 
 
-        isbnButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                String eanText =ean.getText().toString();
-                //catch isbn10 numbers
-                if(eanText.length()==10 && !eanText.startsWith("978")){
-                    eanText="978"+eanText;
+        if(isbnButton != null){
+            Log.v(TAG, "ISBN button not null");
+            isbnButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    String eanText =ean.getText().toString();
+                    //catch isbn10 numbers
+                    if(eanText.length()==10 && !eanText.startsWith("978")){
+                        eanText="978"+eanText;
+                    }
+                    if(eanText.length()<13){
+                        clearFields();
+                        return;
+                    }
+                    //Once we have an ISBN, start a book intent
+                    Intent bookIntent = new Intent(getActivity(), BookService.class);
+                    bookIntent.putExtra(BookService.EAN, eanText);
+                    bookIntent.setAction(BookService.FETCH_BOOK);
+                    getActivity().startService(bookIntent);
+                    AddBook.this.restartLoader();
                 }
-                if(eanText.length()<13){
-                    clearFields();
-                    return;
-                }
-                //Once we have an ISBN, start a book intent
-                Intent bookIntent = new Intent(getActivity(), BookService.class);
-                bookIntent.putExtra(BookService.EAN, eanText);
-                bookIntent.setAction(BookService.FETCH_BOOK);
-                getActivity().startService(bookIntent);
-                AddBook.this.restartLoader();
-            }
-        });
+            });
+        }
+
 
         /*Commented by Ankur - after adding a Check button to validate the text*/
        /*
@@ -232,9 +237,16 @@ public class AddBook extends Fragment implements LoaderManager.LoaderCallbacks<C
         ((TextView) rootView.findViewById(R.id.bookSubTitle)).setText(bookSubTitle);
 
         String authors = data.getString(data.getColumnIndex(AlexandriaContract.AuthorEntry.AUTHOR));
-        String[] authorsArr = authors.split(",");
-        ((TextView) rootView.findViewById(R.id.authors)).setLines(authorsArr.length);
-        ((TextView) rootView.findViewById(R.id.authors)).setText(authors.replace(",","\n"));
+
+        /*Added by Ankur to validate authors*/
+
+        String[] authorsArr = null;
+        if(authors != null && !authors.equals("")) {
+            authorsArr = authors.split(",");
+            ((TextView) rootView.findViewById(R.id.authors)).setLines(authorsArr.length);
+            ((TextView) rootView.findViewById(R.id.authors)).setText(authors.replace(",","\n"));
+        }
+
         String imgUrl = data.getString(data.getColumnIndex(AlexandriaContract.BookEntry.IMAGE_URL));
         if(Patterns.WEB_URL.matcher(imgUrl).matches()){
             new DownloadImage((ImageView) rootView.findViewById(R.id.bookCover)).execute(imgUrl);
