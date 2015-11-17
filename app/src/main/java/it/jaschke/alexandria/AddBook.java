@@ -110,7 +110,7 @@ public class AddBook extends Fragment implements LoaderManager.LoaderCallbacks<C
         }
 
 
-        /*Commented by Ankur - after adding a Check button to validate the text*/
+        /*Commented by Ankur - this logic is now being handled via a ISBN button click.*/
        /*
         ean.addTextChangedListener(new TextWatcher() {
             @Override
@@ -224,8 +224,11 @@ public class AddBook extends Fragment implements LoaderManager.LoaderCallbacks<C
 
     }
 
+    /*Ankur - Made changes to handle errors and validate the incoming data*/
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+        Log.v(TAG, "On Load Finished called");
+
         if (!data.moveToFirst()) {
             return;
         }
@@ -248,7 +251,8 @@ public class AddBook extends Fragment implements LoaderManager.LoaderCallbacks<C
         }
 
         String imgUrl = data.getString(data.getColumnIndex(AlexandriaContract.BookEntry.IMAGE_URL));
-        if(Patterns.WEB_URL.matcher(imgUrl).matches()){
+        //if(Patterns.WEB_URL.matcher(imgUrl).matches()){
+        if(imgUrl != null && Patterns.WEB_URL.matcher(imgUrl).matches()){
             new DownloadImage((ImageView) rootView.findViewById(R.id.bookCover)).execute(imgUrl);
             rootView.findViewById(R.id.bookCover).setVisibility(View.VISIBLE);
         }
