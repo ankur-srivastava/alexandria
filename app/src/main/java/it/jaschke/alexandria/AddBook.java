@@ -9,8 +9,6 @@ import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
 import android.os.Bundle;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.util.Log;
 import android.util.Patterns;
 import android.view.LayoutInflater;
@@ -72,14 +70,17 @@ public class AddBook extends Fragment implements LoaderManager.LoaderCallbacks<C
                 ean="978"+ean;
             }
             if(ean.length()<13){
+                Log.v(TAG, "EAN < 13");
                 clearFields();
             }else{
-                Log.v(TAG, "Result is fine "+scanResult);
+                Log.v(TAG, "Result is fine ean is "+ean);
                 //Once we have an ISBN, start a book intent
                 Intent bookIntent = new Intent(getActivity(), BookService.class);
                 bookIntent.putExtra(BookService.EAN, ean);
                 bookIntent.setAction(BookService.FETCH_BOOK);
+                Log.v(TAG, "Going to start service");
                 getActivity().startService(bookIntent);
+                Log.v(TAG, "Going to restartLoader");
                 AddBook.this.restartLoader();
             }
         }
@@ -103,7 +104,9 @@ public class AddBook extends Fragment implements LoaderManager.LoaderCallbacks<C
                     Intent bookIntent = new Intent(getActivity(), BookService.class);
                     bookIntent.putExtra(BookService.EAN, eanText);
                     bookIntent.setAction(BookService.FETCH_BOOK);
+                    Log.v(TAG, "Going to start service");
                     getActivity().startService(bookIntent);
+                    Log.v(TAG, "Going to restartLoader");
                     AddBook.this.restartLoader();
                 }
             });
@@ -197,6 +200,7 @@ public class AddBook extends Fragment implements LoaderManager.LoaderCallbacks<C
     }
 
     private void restartLoader(){
+        Log.v(TAG, "restartLoader called");
         getLoaderManager().restartLoader(LOADER_ID, null, this);
     }
 
