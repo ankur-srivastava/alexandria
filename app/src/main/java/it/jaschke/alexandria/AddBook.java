@@ -80,7 +80,9 @@ public class AddBook extends Fragment implements LoaderManager.LoaderCallbacks<C
                 bookIntent.putExtra(BookService.EAN, ean);
                 bookIntent.setAction(BookService.FETCH_BOOK);
                 getActivity().startService(bookIntent);
-                AddBook.this.restartLoader();
+
+                //Ankur - As per the documentation this should create  a new Loader or reuse an existing one. Calling restartLoader dint invoke onLoaderFinish method
+                getLoaderManager().initLoader(LOADER_ID, null, this);
             }
         }
 
@@ -202,6 +204,7 @@ public class AddBook extends Fragment implements LoaderManager.LoaderCallbacks<C
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        Log.v(TAG, "In onCreateLoader");
         if(ean.getText().length()==0){
             return null;
         }
@@ -221,7 +224,7 @@ public class AddBook extends Fragment implements LoaderManager.LoaderCallbacks<C
 
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
-
+        Log.v(TAG, "In onLoaderReset");
     }
 
     /*Ankur - Made changes to handle errors and validate the incoming data*/
