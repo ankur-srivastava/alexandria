@@ -204,7 +204,6 @@ public class AddBook extends Fragment implements LoaderManager.LoaderCallbacks<C
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        Log.v(TAG, "In onCreateLoader");
         if(ean.getText().length()==0){
             return null;
         }
