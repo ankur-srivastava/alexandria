@@ -91,7 +91,8 @@ public class BookService extends IntentService {
         }
 
         bookEntry.close();
-
+        //Ankur - Before making service call we need to check user internet connection
+        Log.v(TAG, "Check users Internet connection");
         HttpURLConnection urlConnection = null;
         BufferedReader reader = null;
         String bookJsonString = null;
@@ -107,7 +108,7 @@ public class BookService extends IntentService {
                     .build();
 
             URL url = new URL(builtUri.toString());
-            Log.v(TAG, "URL to fetch the book is "+url);
+            Log.v(TAG, "In BookService - URL to fetch the book is "+url);
 
             urlConnection = (HttpURLConnection) url.openConnection();
             urlConnection.setRequestMethod("GET");
