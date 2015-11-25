@@ -9,6 +9,8 @@ import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.util.Patterns;
 import android.view.LayoutInflater;
@@ -29,7 +31,7 @@ import it.jaschke.alexandria.services.DownloadImage;
 public class AddBook extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
     private static final String TAG = "INTENT_TO_SCAN_ACTIVITY";
     private EditText ean;
-    private Button isbnButton;
+    //private Button isbnButton;
     private final int LOADER_ID = 1;
     private View rootView;
     private final String EAN_CONTENT="eanContent";
@@ -52,34 +54,35 @@ public class AddBook extends Fragment implements LoaderManager.LoaderCallbacks<C
         rootView = inflater.inflate(R.layout.fragment_add_book, container, false);
 
         ean = (EditText) rootView.findViewById(R.id.ean);
-        isbnButton = (Button) rootView.findViewById(R.id.isbn_button);
+        //isbnButton = (Button) rootView.findViewById(R.id.isbn_button);
 
         //Custom Code
         //If after the scan we get the ISBN number then we can set ean with that and start the intent
-        Log.v(TAG, "Check if scan result is available");
         if(scanResult != null && !scanResult.equals("")){
             Log.v(TAG, "Got the scanResult "+scanResult);
-            String ean =scanResult;
+            String eanText =scanResult;
+            ean.setText(eanText);
             //catch isbn10 numbers
-            if(ean.length()==10 && !ean.startsWith("978")){
-                ean="978"+ean;
+            if(eanText.length()==10 && !eanText.startsWith("978")){
+                eanText="978"+eanText;
             }
-            if(ean.length()<13){
+            if(eanText.length()<13){
                 clearFields();
             }else{
                 Log.v(TAG, "Result is fine "+scanResult);
+                ean.setText(eanText);
                 //Once we have an ISBN, start a book intent
                 Intent bookIntent = new Intent(getActivity(), BookService.class);
-                bookIntent.putExtra(BookService.EAN, ean);
+                bookIntent.putExtra(BookService.EAN, eanText);
                 bookIntent.setAction(BookService.FETCH_BOOK);
                 getActivity().startService(bookIntent);
 
                 //Ankur - As per the documentation this should create  a new Loader or reuse an existing one. Calling restartLoader dint invoke onLoaderFinish method
-                getLoaderManager().initLoader(LOADER_ID, null, this);
+                AddBook.this.restartLoader();
             }
         }
 
-
+        /*
         if(isbnButton != null){
             Log.v(TAG, "ISBN button not null");
             isbnButton.setOnClickListener(new View.OnClickListener() {
@@ -103,10 +106,10 @@ public class AddBook extends Fragment implements LoaderManager.LoaderCallbacks<C
                 }
             });
         }
-
+        */
 
         /*Commented by Ankur - this logic is now being handled via a ISBN button click.*/
-       /*
+
         ean.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -120,24 +123,24 @@ public class AddBook extends Fragment implements LoaderManager.LoaderCallbacks<C
 
             @Override
             public void afterTextChanged(Editable s) {
-                String ean =s.toString();
+                String eanText =s.toString();
                 //catch isbn10 numbers
-                if(ean.length()==10 && !ean.startsWith("978")){
-                    ean="978"+ean;
+                if(eanText.length()==10 && !eanText.startsWith("978")){
+                    eanText="978"+eanText;
                 }
-                if(ean.length()<13){
+                if(eanText.length()<13){
                     clearFields();
                     return;
                 }
                 //Once we have an ISBN, start a book intent
                 Intent bookIntent = new Intent(getActivity(), BookService.class);
-                bookIntent.putExtra(BookService.EAN, ean);
+                bookIntent.putExtra(BookService.EAN, eanText);
                 bookIntent.setAction(BookService.FETCH_BOOK);
                 getActivity().startService(bookIntent);
                 AddBook.this.restartLoader();
             }
         });
-        */
+
 
 
 
@@ -150,15 +153,17 @@ public class AddBook extends Fragment implements LoaderManager.LoaderCallbacks<C
                 // Hint: Use a Try/Catch block to handle the Intent dispatch gracefully, if you
                 // are using an external app.
                 //when you're done, remove the toast below.
+                /*
                 Context context = getActivity();
                 CharSequence text = "This button should let you scan a book for its barcode!";
                 int duration = Toast.LENGTH_SHORT;
 
                 Toast toast = Toast.makeText(context, text, duration);
                 toast.show();
-
+                */
                 //Custom Code
                 Log.v(TAG, "Ready for Scan");
+                getLoaderManager().destroyLoader(LOADER_ID);
                 IntentIntegrator scanIntegrator = new IntentIntegrator(getActivity());
                 scanIntegrator.initiateScan();
 
@@ -197,6 +202,7 @@ public class AddBook extends Fragment implements LoaderManager.LoaderCallbacks<C
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        Log.v(TAG, "onCreateLoader called");
         if(ean.getText().length()==0){
             return null;
         }
@@ -260,6 +266,9 @@ public class AddBook extends Fragment implements LoaderManager.LoaderCallbacks<C
 
         rootView.findViewById(R.id.save_button).setVisibility(View.VISIBLE);
         rootView.findViewById(R.id.delete_button).setVisibility(View.VISIBLE);
+
+        /*Added by Ankur*/
+        getLoaderManager().destroyLoader(LOADER_ID);
     }
 
     private void clearFields(){
