@@ -89,6 +89,8 @@
                         android:gravity="right|top"/>
                 </LinearLayout>
 
+                <!--
+                Back button not need as per guidelines
                 <ImageButton
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -101,7 +103,7 @@
                     android:layout_alignParentTop="true"
                     android:layout_alignRight="@+id/fullBookTitle"
                     android:layout_alignEnd="@+id/fullBookTitle"/>
-
+                -->
 
             </RelativeLayout>
 
